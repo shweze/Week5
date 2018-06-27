@@ -1,0 +1,89 @@
+{% extends "myadmin/base.html" %}
+
+
+{% block mainbody %}
+<h2>
+	会员信息浏览
+</h2>
+<form class="form-inline" action="{% url 'myadmin_users_query' %}" method="post">
+		{% csrf_token %}
+	<label class="control-label" for="inputName">关键字：</label>
+	<input type="text" name="name" id="inputName" class="input-small" placeholder="账号/姓名" value={{ name }}>
+	<label class="control-label" for="inputSex">性别：</label>
+	<select class="span1" name="sex">
+		<option value="">全部</option>
+		<option value="1" {% if sex == "1" %}selected{% endif %} >男</option>
+		<option value="0" {% if sex == "0" %}selected{% endif %}>女</option>
+	</select>
+	<button type="submit" class="btn">搜索</button>
+	<a href="{% url 'myadmin_users_index' 1 %}" class="btn">全部</a>
+</form>
+<table class="table table-bordered table-striped">
+	<thead>
+		<tr>
+			<th>id号</th>
+			<th>账号</th>
+			<th>姓名</th>
+			<th>性别</th>
+			<th>邮箱</th>
+			<th>注册时间</th>
+			<th>状态</th>
+			<th>操作</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for vo in userslist %}
+		<tr>
+			<td>{{ vo.id }}</td>
+			<td>{{ vo.username }}</td>
+			<td>{{ vo.name }}</td>
+			<td>{% if vo.sex == 1 %}男{% else %}女{% endif %}</td>
+			<td>{{ vo.email }}</td>
+			<td>{{ vo.addtime|date:'Y-m-d H:i:s' }}</td>
+			<td>{% if vo.state == 0 %}<span style="color:green">管理员</span>
+				{% elif vo.state == 1 %}普通会员
+				{% elif vo.state == 2 %}<span style="color:red">禁停用户</span>
+				{% endif %}
+			</td>
+			<td>
+				<a href="{% url 'myadmin_users_resetpwd' vo.id %}" class="btn btn-success btn-mini" role="button">重置密码</a>
+				<a href="{% url 'myadmin_users_edit' vo.id %}" class="btn btn-primary btn-mini" role="button">编辑</a>
+				<a href="{% url 'myadmin_users_del' vo.id %}" class="btn btn-danger btn-mini" role="button">删除</a>
+			</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>	
+
+<div class="pagination" {% if showPager == "no" %}style="display:none"{% endif %}>
+	<ul>
+		{% if 1 == pIndex %}
+		<li class="disabled">
+		<span>&laquo;</span>
+		{% else %}
+		<li>
+			<a href="{% url 'myadmin_users_index' preIndex %}">&laquo;</a>
+		{% endif %}
+		</li>		
+		{% for i in plist %}
+		{% if i == pIndex %}
+		<li class="active">
+			<a href="#">{{ i }}</a>
+		</li>
+		{% else %}
+		<li>
+			<a href="{% url 'myadmin_users_index' i %}">{{ i }}</a>
+		</li>
+		{% endif %}		
+		{% endfor %}
+		{% if totalPages == pIndex %}
+		<li class="disabled">
+		<span>&raquo;</span>
+		{% else %}
+		<li>
+			<a href="{% url 'myadmin_users_index' nextIndex %}">&raquo;</a>
+		{% endif %}
+		</li>
+	</ul>
+</div>
+{% endblock %}
